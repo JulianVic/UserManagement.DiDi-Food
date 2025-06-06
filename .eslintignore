@@ -1,0 +1,7 @@
+# Deshabilitar ESLint para todo el proyecto
+*
+**/*
+src/
+dist/
+node_modules/
+test/ 

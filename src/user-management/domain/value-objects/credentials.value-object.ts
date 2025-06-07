@@ -1,10 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable prettier/prettier */
-import * as bcrypt from 'bcrypt';
-
 export class Credentials {
   constructor(
     private readonly username: string,
@@ -15,7 +8,7 @@ export class Credentials {
 
   private validateCredentials(): void {
     this.validateUsername();
-    this.validatePassword();
+    this.validatePassword(this.hashedPassword);
   }
 
   private validateUsername(): void {
@@ -29,7 +22,7 @@ export class Credentials {
 
     if (this.username.length > 20) {
       throw new Error(
-        'El nombre de usuario no puede tener más de 20 caracteres'
+        'El nombre de usuario no puede tener más de 20 caracteres',
       );
     }
 
@@ -41,31 +34,15 @@ export class Credentials {
     }
   }
 
-  private validatePassword(): void {
-    if (!this.hashedPassword?.trim()) {
-      throw new Error('La contraseña hasheada es requerida');
-    }
-  }
-
-  static async createFromPlainPassword(
-    username: string,
-    plainPassword: string,
-  ): Promise<Credentials> {
-    this.validatePlainPassword(plainPassword);
-    const saltRounds = 12;
-    const hashedPassword = await bcrypt.hash(plainPassword, saltRounds);
-    return new Credentials(username, hashedPassword);
-  }
-
-  private static validatePlainPassword(password: string): void {
+  private validatePassword(password: string): void {
     if (!password?.trim()) {
       throw new Error('La contraseña es requerida');
     }
-    
+
     if (password.length < 8) {
       throw new Error('La contraseña debe tener al menos 8 caracteres');
     }
-    
+
     if (password.length > 128) {
       throw new Error('La contraseña no puede tener más de 128 caracteres');
     }
@@ -78,12 +55,6 @@ export class Credentials {
         'La contraseña debe contener al menos: una mayúscula, una minúscula, un número y un carácter especial',
       );
     }
-  }
-
-  async verifyPassword(plainPassword: string): Promise<boolean> {
-    return await bcrypt.compare(
-      plainPassword, this.hashedPassword
-    );
   }
 
   getUsername(): string {

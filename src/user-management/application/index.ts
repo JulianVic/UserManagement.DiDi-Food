@@ -7,6 +7,7 @@ export * from './dtos/update-user.dto';
 export * from './use-cases/create-user.use-case';
 export * from './use-cases/get-user-by-id.use-case';
 export * from './use-cases/get-user-by-email.use-case';
+export * from './use-cases/get-all-users.use-case';
 export * from './use-cases/delete-user.use-case';
 export * from './use-cases/manage-user-addresses.use-case';
 

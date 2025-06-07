@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { IUserRepository } from '../../domain/ports/user.repository.interface';
+import { Injectable, Inject } from '@nestjs/common';
+import { IUserRepository, USER_REPOSITORY_TOKEN } from '../../domain/ports/user.repository.interface';
 import { AddressDto } from '../dtos/create-user.dto';
 import {
   UserResponseDto,
@@ -10,7 +10,10 @@ import { User } from '../../domain/entities/user.entity';
 
 @Injectable()
 export class ManageUserAddressesUseCase {
-  constructor(private readonly userRepository: IUserRepository) {}
+  constructor(
+    @Inject(USER_REPOSITORY_TOKEN)
+    private readonly userRepository: IUserRepository,
+  ) {}
 
   async addAddress(
     userId: string,

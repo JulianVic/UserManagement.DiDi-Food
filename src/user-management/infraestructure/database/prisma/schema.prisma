@@ -1,0 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db" 
+}
+
+enum Role {
+  CUSTOMER      @map("cliente")
+  DELIVERY_PERSON @map("repartidor") 
+  RESTAURANT_USER @map("restaurante")
+}
+
+model User {
+  id              String   @id @default(uuid())
+  name            String
+  lastName        String?
+  username        String   @unique  
+  email           String   @unique
+  phone           String
+  hashedPassword  String
+  role            Role
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  profilePictureUrl String?
+  vehicleType       String? 
+
+  addresses Address[]
+}
+
+model Address {
+  id             String  @id @default(uuid())
+  street         String
+  number         String
+  neighborhood   String
+  city           String
+  state          String
+  zipCode        String
+  country        String
+  additionalInfo String?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+}

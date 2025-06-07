@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserUseCase } from '../use-cases/create-user.use-case';
 import { GetUserByIdUseCase } from '../use-cases/get-user-by-id.use-case';
 import { GetUserByEmailUseCase } from '../use-cases/get-user-by-email.use-case';
+import { GetAllUsersUseCase } from '../use-cases/get-all-users.use-case';
 import { DeleteUserUseCase } from '../use-cases/delete-user.use-case';
 import { ManageUserAddressesUseCase } from '../use-cases/manage-user-addresses.use-case';
 import { CreateUserDto, AddressDto } from '../dtos/create-user.dto';
@@ -13,6 +14,7 @@ export class UserApplicationService {
     private readonly createUserUseCase: CreateUserUseCase,
     private readonly getUserByIdUseCase: GetUserByIdUseCase,
     private readonly getUserByEmailUseCase: GetUserByEmailUseCase,
+    private readonly getAllUsersUseCase: GetAllUsersUseCase,
     private readonly deleteUserUseCase: DeleteUserUseCase,
     private readonly manageUserAddressesUseCase: ManageUserAddressesUseCase,
   ) {}
@@ -46,6 +48,14 @@ export class UserApplicationService {
       return user;
     } catch (error) {
       throw new Error(`Error al obtener usuario: ${error}`);
+    }
+  }
+
+  async getAllUsers(): Promise<UserResponseDto[]> {
+    try {
+      return await this.getAllUsersUseCase.execute();
+    } catch (error) {
+      throw new Error(`Error al obtener usuarios: ${error}`);
     }
   }
 

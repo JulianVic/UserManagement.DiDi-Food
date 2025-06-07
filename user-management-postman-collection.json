@@ -1,0 +1,537 @@
+{
+  "info": {
+    "name": "User Management API - Sistema SOA",
+    "description": "API completa para gestión de usuarios con arquitectura hexagonal. Incluye operaciones CRUD, gestión de direcciones y validaciones robustas.",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "🏠 Sistema",
+      "description": "Endpoints para verificar el estado del sistema",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": ["{{baseUrl}}"],
+              "path": [""]
+            },
+            "description": "Verifica que la API esté funcionando correctamente"
+          },
+          "response": [
+            {
+              "name": "Respuesta exitosa",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/",
+                  "host": ["{{baseUrl}}"],
+                  "path": [""]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [],
+              "cookie": [],
+              "body": "Hello World!"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "👤 Gestión de Usuarios",
+      "description": "Operaciones CRUD para usuarios del sistema",
+      "item": [
+        {
+          "name": "📋 Listar Todos los Usuarios",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Response status code is 200', function () {",
+                  "    pm.expect(pm.response.code).to.equal(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has success field', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('success');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "});",
+                  "",
+                  "pm.test('Data is an array', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (responseJson.success) {",
+                  "        pm.expect(responseJson.data).to.be.an('array');",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/all",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "all"]
+            },
+            "description": "Obtiene la lista completa de usuarios registrados en el sistema. Retorna un array con todos los usuarios activos."
+          }
+        },
+        {
+          "name": "➕ Crear Usuario Cliente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Usuario creado exitosamente', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(pm.response.code).to.equal(201);",
+                  "    pm.expect(responseJson.success).to.be.true;",
+                  "    ",
+                  "    if (responseJson.success && responseJson.data) {",
+                  "        pm.environment.set('userId', responseJson.data.id);",
+                  "        pm.environment.set('userEmail', responseJson.data.contact.email);",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test('User has all required fields', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (responseJson.success && responseJson.data) {",
+                  "        const user = responseJson.data;",
+                  "        pm.expect(user).to.have.property('id');",
+                  "        pm.expect(user).to.have.property('name');",
+                  "        pm.expect(user).to.have.property('contact');",
+                  "        pm.expect(user).to.have.property('role');",
+                  "        pm.expect(user.role).to.equal('cliente');",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Juan Carlos\",\n  \"lastName\": \"Pérez García\",\n  \"contact\": {\n    \"email\": \"juan.perez@ejemplo.com\",\n    \"phone\": \"9612345678\"\n  },\n  \"password\": \"MiPassword123@\",\n  \"role\": \"cliente\",\n  \"addresses\": [\n    {\n      \"street\": \"Av. Central\",\n      \"number\": \"123\",\n      \"neighborhood\": \"Centro\",\n      \"city\": \"Tuxtla Gutiérrez\",\n      \"state\": \"Chiapas\",\n      \"zipCode\": \"29000\",\n      \"country\": \"México\",\n      \"additionalInfo\": \"Casa azul con portón blanco\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user",
+              "host": ["{{baseUrl}}"],
+              "path": ["user"]
+            },
+            "description": "Crea un nuevo usuario cliente. Requiere datos de contacto válidos, contraseña segura y opcionalmente direcciones.\n\n**Validaciones:**\n- Email: formato válido\n- Teléfono: 10 dígitos mexicanos\n- Contraseña: min 8 chars, mayúscula, minúscula, número, carácter especial\n- Rol: 'cliente'"
+          }
+        },
+        {
+          "name": "🚚 Crear Usuario Repartidor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"María Elena\",\n  \"lastName\": \"González López\",\n  \"contact\": {\n    \"email\": \"maria.delivery@ejemplo.com\",\n    \"phone\": \"9619876543\"\n  },\n  \"password\": \"DeliveryPass456!\",\n  \"role\": \"repartidor\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user",
+              "host": ["{{baseUrl}}"],
+              "path": ["user"]
+            },
+            "description": "Crea un nuevo usuario repartidor. Los repartidores pueden gestionar entregas en el sistema."
+          }
+        },
+        {
+          "name": "🍽️ Crear Usuario Restaurante",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Restaurante Los Sabores de Chiapas\",\n  \"contact\": {\n    \"email\": \"info@lossaboreschis.com\",\n    \"phone\": \"9615551234\"\n  },\n  \"password\": \"RestaurantPass789$\",\n  \"role\": \"restaurante\",\n  \"addresses\": [\n    {\n      \"street\": \"Blvd. Belisario Domínguez\",\n      \"number\": \"789\",\n      \"neighborhood\": \"Las Granjas\",\n      \"city\": \"Tuxtla Gutiérrez\",\n      \"state\": \"Chiapas\",\n      \"zipCode\": \"29020\",\n      \"country\": \"México\",\n      \"additionalInfo\": \"Local comercial en planta baja, esquina\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user",
+              "host": ["{{baseUrl}}"],
+              "path": ["user"]
+            },
+            "description": "Crea un nuevo usuario restaurante. Los restaurantes pueden gestionar sus menús y órdenes."
+          }
+        },
+        {
+          "name": "🔍 Obtener Usuario por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Usuario encontrado por ID', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (pm.response.code === 200) {",
+                  "        pm.expect(responseJson.success).to.be.true;",
+                  "        pm.expect(responseJson.data).to.have.property('id');",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "{{userId}}"]
+            },
+            "description": "Obtiene un usuario específico por su ID único. Retorna todos los detalles del usuario incluyendo contacto y direcciones."
+          }
+        },
+        {
+          "name": "📧 Obtener Usuario por Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Usuario encontrado por email', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (pm.response.code === 200) {",
+                  "        pm.expect(responseJson.success).to.be.true;",
+                  "        pm.expect(responseJson.data.contact.email).to.include(pm.environment.get('userEmail'));",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user?email={{userEmail}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["user"],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "{{userEmail}}",
+                  "description": "Email del usuario a buscar"
+                }
+              ]
+            },
+            "description": "Busca un usuario por su dirección de email. Útil para validaciones de login o verificación de usuarios existentes."
+          }
+        },
+        {
+          "name": "✅ Verificar si Usuario Existe",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/{{userId}}/exists",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "{{userId}}", "exists"]
+            },
+            "description": "Verifica si un usuario existe en el sistema por su ID. Retorna true/false sin exponer datos sensibles."
+          }
+        },
+        {
+          "name": "📬 Verificar si Email Existe",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/email/{{userEmail}}/exists",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "email", "{{userEmail}}", "exists"]
+            },
+            "description": "Verifica si un email ya está registrado en el sistema. Útil para validaciones antes de registro."
+          }
+        },
+        {
+          "name": "🗑️ Eliminar Usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Usuario eliminado exitosamente', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.success).to.be.true;",
+                  "    pm.expect(responseJson.message).to.include('eliminado');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "{{userId}}"]
+            },
+            "description": "Elimina (desactiva) un usuario del sistema. Los usuarios eliminados mantienen sus datos pero quedan inactivos."
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏠 Gestión de Direcciones",
+      "description": "Operaciones para gestionar direcciones de usuarios",
+      "item": [
+        {
+          "name": "➕ Agregar Dirección a Usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Dirección agregada exitosamente', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(pm.response.code).to.equal(201);",
+                  "    pm.expect(responseJson.success).to.be.true;",
+                  "    pm.expect(responseJson.message).to.include('Dirección agregada');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"street\": \"Calle Secundaria\",\n  \"number\": \"456\",\n  \"neighborhood\": \"El Retiro\",\n  \"city\": \"Tuxtla Gutiérrez\",\n  \"state\": \"Chiapas\",\n  \"zipCode\": \"29050\",\n  \"country\": \"México\",\n  \"additionalInfo\": \"Departamento 3B, segundo piso, edificio amarillo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/{{userId}}/addresses",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "{{userId}}", "addresses"]
+            },
+            "description": "Agrega una nueva dirección a un usuario existente. Los usuarios pueden tener máximo 5 direcciones."
+          }
+        },
+        {
+          "name": "➖ Eliminar Dirección de Usuario",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"street\": \"Calle Secundaria\",\n  \"number\": \"456\",\n  \"neighborhood\": \"El Retiro\",\n  \"city\": \"Tuxtla Gutiérrez\",\n  \"state\": \"Chiapas\",\n  \"zipCode\": \"29050\",\n  \"country\": \"México\",\n  \"additionalInfo\": \"Departamento 3B, segundo piso, edificio amarillo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/{{userId}}/addresses",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "{{userId}}", "addresses"]
+            },
+            "description": "Elimina una dirección específica de un usuario. Debe coincidir exactamente con los datos de la dirección existente."
+          }
+        }
+      ]
+    },
+    {
+      "name": "🧪 Casos de Prueba",
+      "description": "Flujos de prueba y validaciones",
+      "item": [
+        {
+          "name": "❌ Error: Teléfono Inválido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Error\",\n  \"contact\": {\n    \"email\": \"test@test.com\",\n    \"phone\": \"123\"\n  },\n  \"password\": \"Password123@\",\n  \"role\": \"cliente\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user",
+              "host": ["{{baseUrl}}"],
+              "path": ["user"]
+            },
+            "description": "Prueba que falla: teléfono con formato inválido. Debe retornar error de validación."
+          }
+        },
+        {
+          "name": "❌ Error: Email Duplicado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Usuario Duplicado\",\n  \"contact\": {\n    \"email\": \"{{userEmail}}\",\n    \"phone\": \"9612345678\"\n  },\n  \"password\": \"Password123@\",\n  \"role\": \"cliente\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user",
+              "host": ["{{baseUrl}}"],
+              "path": ["user"]
+            },
+            "description": "Prueba que falla: intenta crear usuario con email ya existente."
+          }
+        },
+        {
+          "name": "❌ Error: Contraseña Débil",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Contraseña\",\n  \"contact\": {\n    \"email\": \"test.password@test.com\",\n    \"phone\": \"9612345678\"\n  },\n  \"password\": \"123\",\n  \"role\": \"cliente\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user",
+              "host": ["{{baseUrl}}"],
+              "path": ["user"]
+            },
+            "description": "Prueba que falla: contraseña que no cumple requisitos de seguridad."
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Script global que se ejecuta antes de cada request",
+          "console.log('Ejecutando request a:', pm.request.url);"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Script global que se ejecuta después de cada request",
+          "pm.test('Response time is less than 2000ms', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+          "});",
+          "",
+          "pm.test('Response has valid JSON structure', function () {",
+          "    try {",
+          "        const response = pm.response.json();",
+          "        pm.expect(response).to.be.an('object');",
+          "    } catch (e) {",
+          "        // Si no es JSON, verificar que sea text/html (health check)",
+          "        pm.expect(pm.response.headers.get('Content-Type')).to.include('text');",
+          "    }",
+          "});"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "description": "URL base del servidor de desarrollo"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "description": "ID del último usuario creado (se actualiza automáticamente)"
+    },
+    {
+      "key": "userEmail",
+      "value": "juan.perez@ejemplo.com",
+      "description": "Email del usuario para pruebas"
+    }
+  ]
+} 

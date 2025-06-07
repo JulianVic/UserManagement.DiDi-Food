@@ -7,24 +7,15 @@ import {
 import { User } from '../../domain/entities/user.entity';
 
 @Injectable()
-export class GetUserByIdUseCase {
+export class GetAllUsersUseCase {
   constructor(
     @Inject(USER_REPOSITORY_TOKEN)
     private readonly userRepository: IUserRepository,
   ) {}
 
-  async execute(userId: string): Promise<UserResponseDto | null> {
-    if (!userId?.trim()) {
-      throw new Error('El ID del usuario es requerido');
-    }
-
-    const user = await this.userRepository.findById(userId);
-
-    if (!user) {
-      return null;
-    }
-
-    return this.mapToResponseDto(user);
+  async execute(): Promise<UserResponseDto[]> {
+    const users = await this.userRepository.findAll();
+    return users.map(user => this.mapToResponseDto(user));
   }
 
   private mapToResponseDto(user: User): UserResponseDto {
@@ -40,8 +31,8 @@ export class GetUserByIdUseCase {
         userData.contact.phone,
       ),
       user.getRole(),
-      [],
-      true,
+      [], // Las direcciones se pueden mapear si están disponibles
+      user.getIsActive(),
     );
   }
-}
+} 

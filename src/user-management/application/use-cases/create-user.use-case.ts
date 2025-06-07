@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { IUserRepository } from '../../domain/ports/user.repository.interface';
+import { Injectable, Inject } from '@nestjs/common';
+import { IUserRepository, USER_REPOSITORY_TOKEN } from '../../domain/ports/user.repository.interface';
 import { CreateUserDto } from '../dtos/create-user.dto';
 import {
   UserResponseDto,
@@ -17,7 +17,10 @@ import { randomUUID } from 'node:crypto';
 
 @Injectable()
 export class CreateUserUseCase {
-  constructor(private readonly userRepository: IUserRepository) {}
+  constructor(
+    @Inject(USER_REPOSITORY_TOKEN)
+    private readonly userRepository: IUserRepository,
+  ) {}
 
   async execute(createUserDto: CreateUserDto): Promise<UserResponseDto> {
     const existingUser = await this.userRepository.findByEmail(

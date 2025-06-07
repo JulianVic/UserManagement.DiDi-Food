@@ -34,6 +34,14 @@ export abstract class User {
     return this.contact.getEmail();
   }
 
+  public getIsActive(): boolean {
+    return this.isActive;
+  }
+
+  public getAddresses(): Address[] {
+    return this.addresses;
+  }
+
   public addAddress(address: Address): void {
     if (this.addresses.length >= 5) {
       throw new Error('El usuario no puede tener más de 5 direcciones');

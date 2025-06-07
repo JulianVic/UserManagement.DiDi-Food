@@ -6,6 +6,34 @@ export class Credentials {
     this.validateCredentials();
   }
 
+  // Método estático para crear desde datos persistidos (sin validación de contraseña)
+  static fromPersisted(username: string, hashedPassword: string): Credentials {
+    // Validar solo el username para datos de BD
+    if (!username?.trim()) {
+      throw new Error('El nombre de usuario es requerido');
+    }
+    if (username.length < 3) {
+      throw new Error('El nombre de usuario debe tener al menos 3 caracteres');
+    }
+    if (username.length > 50) {
+      throw new Error(
+        'El nombre de usuario no puede tener más de 50 caracteres',
+      );
+    }
+    const usernameRegex = /^[a-zA-Z0-9_.-@]+$/;
+    if (!usernameRegex.test(username)) {
+      throw new Error(
+        'El nombre de usuario solo puede contener letras, números, puntos, guiones, guiones bajos y @',
+      );
+    }
+
+    // Crear instancia sin validar contraseña hasheada
+    return Object.assign(Object.create(Credentials.prototype), {
+      username,
+      hashedPassword,
+    }) as Credentials;
+  }
+
   private validateCredentials(): void {
     this.validateUsername();
     this.validatePassword(this.hashedPassword);
@@ -20,16 +48,17 @@ export class Credentials {
       throw new Error('El nombre de usuario debe tener al menos 3 caracteres');
     }
 
-    if (this.username.length > 20) {
+    if (this.username.length > 50) {
       throw new Error(
-        'El nombre de usuario no puede tener más de 20 caracteres',
+        'El nombre de usuario no puede tener más de 50 caracteres',
       );
     }
 
-    const usernameRegex = /^[a-zA-Z0-9_.-]+$/;
+    // Permitir emails como username (contienen @)
+    const usernameRegex = /^[a-zA-Z0-9_.-@]+$/;
     if (!usernameRegex.test(this.username)) {
       throw new Error(
-        'El nombre de usuario solo puede contener letras, números, puntos, guiones y guiones bajos',
+        'El nombre de usuario solo puede contener letras, números, puntos, guiones, guiones bajos y @',
       );
     }
   }

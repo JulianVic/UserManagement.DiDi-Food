@@ -4,6 +4,7 @@ import { AddressDto } from '../dtos/create-user.dto';
 import {
   UserResponseDto,
   ContactInfoResponseDto,
+  AddressResponseDto,
 } from '../dtos/user-response.dto';
 import { Address } from '../../domain/value-objects/adress.value-object';
 import { User } from '../../domain/entities/user.entity';
@@ -27,6 +28,10 @@ export class ManageUserAddressesUseCase {
 
     if (!user) {
       throw new Error('Usuario no encontrado');
+    }
+
+    if (!user.getIsActive()) {
+      throw new Error('No se pueden agregar direcciones a un usuario eliminado');
     }
 
     const address = new Address(
@@ -63,6 +68,10 @@ export class ManageUserAddressesUseCase {
       throw new Error('Usuario no encontrado');
     }
 
+    if (!user.getIsActive()) {
+      throw new Error('No se pueden eliminar direcciones de un usuario eliminado');
+    }
+
     const address = new Address(
       addressDto.street,
       addressDto.number,
@@ -74,7 +83,12 @@ export class ManageUserAddressesUseCase {
       addressDto.additionalInfo,
     );
 
-    user.removeAddress(address);
+    const wasRemoved = user.removeAddress(address);
+    
+    if (!wasRemoved) {
+      throw new Error('La dirección especificada no fue encontrada en el usuario');
+    }
+
     const updatedUser = await this.userRepository.save(user);
 
     return this.mapToResponseDto(updatedUser);
@@ -93,8 +107,15 @@ export class ManageUserAddressesUseCase {
         userData.contact.phone,
       ),
       user.getRole(),
-      [], // Las direcciones se mapearían aquí si estuvieran disponibles en toJSON()
-      true,
+      userData.addresses.map(addr => new AddressResponseDto(
+        addr.street,
+        addr.number,
+        addr.city,
+        addr.state,
+        addr.zipCode,
+        addr.additionalInfo
+      )),
+      user.getIsActive(),
     );
   }
 }

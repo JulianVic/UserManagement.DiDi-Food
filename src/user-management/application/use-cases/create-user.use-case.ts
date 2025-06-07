@@ -4,6 +4,7 @@ import { CreateUserDto } from '../dtos/create-user.dto';
 import {
   UserResponseDto,
   ContactInfoResponseDto,
+  AddressResponseDto,
 } from '../dtos/user-response.dto';
 import { ContactInfo } from '../../domain/value-objects/contact-info.value-object';
 import { Credentials } from '../../domain/value-objects/credentials.value-object';
@@ -26,8 +27,10 @@ export class CreateUserUseCase {
     const existingUser = await this.userRepository.findByEmail(
       createUserDto.contact.email,
     );
-    if (existingUser) {
-      throw new Error('El email ya está en uso');
+    
+    // Solo validar duplicados si el usuario existente está activo
+    if (existingUser && existingUser.getIsActive()) {
+      throw new Error('El email ya está en uso por un usuario activo');
     }
 
     const contactInfo = new ContactInfo(
@@ -109,8 +112,15 @@ export class CreateUserUseCase {
         userData.contact.phone,
       ),
       user.getRole(),
-      [],
-      true,
+      userData.addresses.map(addr => new AddressResponseDto(
+        addr.street,
+        addr.number,
+        addr.city,
+        addr.state,
+        addr.zipCode,
+        addr.additionalInfo
+      )),
+      user.getIsActive(),
     );
   }
 }

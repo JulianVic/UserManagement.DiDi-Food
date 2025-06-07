@@ -23,7 +23,7 @@ export abstract class User {
   }
 
   public getFullName(): string {
-    return this.name;
+    return this.lastName ? `${this.name} ${this.lastName}` : this.name;
   }
 
   public getRole(): UserRole {
@@ -49,13 +49,13 @@ export abstract class User {
     this.addresses.push(address);
   }
 
-  public removeAddress(address: Address): void {
-    const index = this.addresses.findIndex(
-      (a) => a.getFullAddress() === address.getFullAddress(),
-    );
+  public removeAddress(address: Address): boolean {
+    const index = this.addresses.findIndex((a) => a.equals(address));
     if (index !== -1) {
       this.addresses.splice(index, 1);
+      return true;
     }
+    return false;
   }
 
   public deleteUser(): void {
@@ -77,8 +77,12 @@ export abstract class User {
       id: this.id,
       name: this.name,
       lastName: this.lastName,
+      fullName: this.getFullName(),
       contact: this.contact.toJSON(),
       credentials: this.credentials.toJSON(),
+      role: this.role,
+      addresses: this.addresses.map((addr) => addr.toJSON()),
+      isActive: this.isActive,
     };
   }
 }

@@ -3,6 +3,7 @@ import { IUserRepository, USER_REPOSITORY_TOKEN } from '../../domain/ports/user.
 import {
   UserResponseDto,
   ContactInfoResponseDto,
+  AddressResponseDto,
 } from '../dtos/user-response.dto';
 import { User } from '../../domain/entities/user.entity';
 
@@ -15,7 +16,8 @@ export class GetAllUsersUseCase {
 
   async execute(): Promise<UserResponseDto[]> {
     const users = await this.userRepository.findAll();
-    return users.map(user => this.mapToResponseDto(user));
+    const activeUsers = users.filter(user => user.getIsActive());
+    return activeUsers.map(user => this.mapToResponseDto(user));
   }
 
   private mapToResponseDto(user: User): UserResponseDto {
@@ -31,7 +33,14 @@ export class GetAllUsersUseCase {
         userData.contact.phone,
       ),
       user.getRole(),
-      [], // Las direcciones se pueden mapear si están disponibles
+      userData.addresses.map(addr => new AddressResponseDto(
+        addr.street,
+        addr.number,
+        addr.city,
+        addr.state,
+        addr.zipCode,
+        addr.additionalInfo
+      )),
       user.getIsActive(),
     );
   }

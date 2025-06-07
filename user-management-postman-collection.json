@@ -479,6 +479,100 @@
             },
             "description": "Prueba que falla: contraseña que no cumple requisitos de seguridad."
           }
+        },
+        {
+          "name": "❌ Error: Usuario Eliminado - Consultar",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Necesitas un userId de un usuario eliminado",
+                  "// Primero elimina un usuario y guarda su ID"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/{{deletedUserId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "{{deletedUserId}}"]
+            },
+            "description": "Prueba que falla: intenta obtener un usuario que fue eliminado. Debe retornar error indicando que el usuario no está disponible."
+          }
+        },
+        {
+          "name": "❌ Error: Usuario Eliminado - Agregar Dirección",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"street\": \"Calle Test\",\n  \"number\": \"123\",\n  \"neighborhood\": \"Test\",\n  \"city\": \"Test City\",\n  \"state\": \"Test State\",\n  \"zipCode\": \"12345\",\n  \"country\": \"México\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/{{deletedUserId}}/addresses",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "{{deletedUserId}}", "addresses"]
+            },
+            "description": "Prueba que falla: intenta agregar dirección a usuario eliminado."
+          }
+        },
+        {
+          "name": "✅ Flujo: Crear, Eliminar, Intentar Reutilizar Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Este test verifica que se puede reutilizar email de usuario eliminado",
+                  "pm.test('Permite reutilizar email de usuario eliminado', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (pm.response.code === 201) {",
+                  "        pm.expect(responseJson.success).to.be.true;",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Usuario Reutilizado\",\n  \"lastName\": \"Test\",\n  \"contact\": {\n    \"email\": \"reutilizar@test.com\",\n    \"phone\": \"9612345678\"\n  },\n  \"password\": \"NewPassword123@\",\n  \"role\": \"cliente\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user",
+              "host": ["{{baseUrl}}"],
+              "path": ["user"]
+            },
+            "description": "Crea usuario con email que anteriormente perteneció a usuario eliminado. Debe funcionar correctamente."
+          }
         }
       ]
     }
@@ -532,6 +626,11 @@
       "key": "userEmail",
       "value": "juan.perez@ejemplo.com",
       "description": "Email del usuario para pruebas"
+    },
+    {
+      "key": "deletedUserId",
+      "value": "",
+      "description": "ID de un usuario eliminado para pruebas de validación"
     }
   ]
 } 

@@ -3,6 +3,7 @@ import { IUserRepository, USER_REPOSITORY_TOKEN } from '../../domain/ports/user.
 import {
   UserResponseDto,
   ContactInfoResponseDto,
+  AddressResponseDto,
 } from '../dtos/user-response.dto';
 import { User } from '../../domain/entities/user.entity';
 
@@ -24,6 +25,10 @@ export class GetUserByIdUseCase {
       return null;
     }
 
+    if (!user.getIsActive()) {
+      throw new Error('El usuario ha sido eliminado y no está disponible');
+    }
+
     return this.mapToResponseDto(user);
   }
 
@@ -40,8 +45,15 @@ export class GetUserByIdUseCase {
         userData.contact.phone,
       ),
       user.getRole(),
-      [],
-      true,
+      userData.addresses.map(addr => new AddressResponseDto(
+        addr.street,
+        addr.number,
+        addr.city,
+        addr.state,
+        addr.zipCode,
+        addr.additionalInfo
+      )),
+      user.getIsActive(),
     );
   }
 }

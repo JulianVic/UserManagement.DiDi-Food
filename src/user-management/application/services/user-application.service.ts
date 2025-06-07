@@ -104,7 +104,7 @@ export class UserApplicationService {
   async userExists(userId: string): Promise<boolean> {
     try {
       const user = await this.getUserByIdUseCase.execute(userId);
-      return user !== null;
+      return user !== null && user.isActive;
     } catch {
       return false;
     }
@@ -113,7 +113,7 @@ export class UserApplicationService {
   async emailExists(email: string): Promise<boolean> {
     try {
       const user = await this.getUserByEmailUseCase.execute(email);
-      return user !== null;
+      return user !== null && user.isActive;
     } catch {
       return false;
     }

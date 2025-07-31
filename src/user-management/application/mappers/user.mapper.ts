@@ -23,7 +23,7 @@ export class UserMapper {
         userData.contact.phone,
       ),
       user.getRole(),
-      [], // Las direcciones se mapearían aquí cuando estén disponibles en la entidad
+      [],
       true,
     );
   }

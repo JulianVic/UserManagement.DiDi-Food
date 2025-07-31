@@ -1,5 +1,8 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { IUserRepository, USER_REPOSITORY_TOKEN } from '../../domain/ports/user.repository.interface';
+import {
+  IUserRepository,
+  USER_REPOSITORY_TOKEN,
+} from '../../domain/ports/user.repository.interface';
 import { CreateUserDto } from '../dtos/create-user.dto';
 import {
   UserResponseDto,
@@ -27,7 +30,7 @@ export class CreateUserUseCase {
     const existingUser = await this.userRepository.findByEmail(
       createUserDto.contact.email,
     );
-    
+
     // Solo validar duplicados si el usuario existente está activo
     if (existingUser && existingUser.getIsActive()) {
       throw new Error('El email ya está en uso por un usuario activo');
@@ -112,14 +115,17 @@ export class CreateUserUseCase {
         userData.contact.phone,
       ),
       user.getRole(),
-      userData.addresses.map(addr => new AddressResponseDto(
-        addr.street,
-        addr.number,
-        addr.city,
-        addr.state,
-        addr.zipCode,
-        addr.additionalInfo
-      )),
+      userData.addresses.map(
+        (addr) =>
+          new AddressResponseDto(
+            addr.street,
+            addr.number,
+            addr.city,
+            addr.state,
+            addr.zipCode,
+            addr.additionalInfo,
+          ),
+      ),
       user.getIsActive(),
     );
   }

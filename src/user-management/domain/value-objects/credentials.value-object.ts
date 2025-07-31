@@ -6,9 +6,7 @@ export class Credentials {
     this.validateCredentials();
   }
 
-  // Método estático para crear desde datos persistidos (sin validación de contraseña)
   static fromPersisted(username: string, hashedPassword: string): Credentials {
-    // Validar solo el username para datos de BD
     if (!username?.trim()) {
       throw new Error('El nombre de usuario es requerido');
     }
@@ -27,7 +25,6 @@ export class Credentials {
       );
     }
 
-    // Crear instancia sin validar contraseña hasheada
     return Object.assign(Object.create(Credentials.prototype), {
       username,
       hashedPassword,
@@ -54,7 +51,6 @@ export class Credentials {
       );
     }
 
-    // Permitir emails como username (contienen @)
     const usernameRegex = /^[a-zA-Z0-9_.-@]+$/;
     if (!usernameRegex.test(this.username)) {
       throw new Error(
@@ -76,7 +72,6 @@ export class Credentials {
       throw new Error('La contraseña no puede tener más de 128 caracteres');
     }
 
-    // Al menos una mayúscula, una minúscula, un número y un carácter especial
     const passwordRegex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
     if (!passwordRegex.test(password)) {

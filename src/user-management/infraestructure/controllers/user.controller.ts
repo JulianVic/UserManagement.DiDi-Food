@@ -20,7 +20,7 @@ import { UserResponseDto } from '../../application/dtos/user-response.dto';
 interface ApiResponse<T> {
   success: boolean;
   message: string;
-  data: T | null; //quue es T? T es
+  data: T | null;
 }
 
 @Controller('user')
